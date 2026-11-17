@@ -415,3 +415,6 @@ if __name__ == "__main__":
         testar_funcoes()
     else:
         app.run(debug=True)
+
+##o html e css estão feitos, mas não prontos.
+##então o código roda perfeitamente, mas a interface não está completa.
