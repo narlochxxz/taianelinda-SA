@@ -17,6 +17,8 @@ R$ {{ "{:,.2f}".format(v).replace(",", "#").replace(".", ",").replace("#", ".") 
 {% set andamento = ordens | selectattr('status', 'equalto', 'em andamento') | list | length %}
 {% set concluidas = ordens | selectattr('status', 'equalto', 'concluída') | list | length %}
 {% set soma = ordens | sum(attribute='valor') %}
+{# Se um formulário voltou com erro, abre a aba dele #}
+{% set aba_inicial = 'nova-ordem' if 'descricao' in form else ('novo-veiculo' if 'placa' in form else '') %}
 
     <header class="topo">
         <div class="topo-conteudo">
@@ -31,7 +33,7 @@ R$ {{ "{:,.2f}".format(v).replace(",", "#").replace(".", ",").replace("#", ".") 
         </div>
     </header>
 
-    <main class="pagina">
+    <main class="pagina" data-aba-inicial="{{ aba_inicial }}">
 
         <!-- Mensagens de sucesso e erro -->
         {% with mensagens = get_flashed_messages(with_categories=true) %}
@@ -71,201 +73,197 @@ R$ {{ "{:,.2f}".format(v).replace(",", "#").replace(".", ",").replace("#", ".") 
             </article>
         </section>
 
-        <!-- Formulários -->
-        <section class="grade-2">
-            <form class="cartao" action="/cadastrar" method="post">
-                <h2>Novo veículo</h2>
-                <p class="ajuda">Se o cliente já existir (mesmo nome e telefone), o veículo é ligado a ele.</p>
+        <!-- Abas -->
+        <nav class="abas" role="tablist" aria-label="Seções do sistema">
+            <button type="button" class="aba" role="tab" id="aba-ordens" data-aba="ordens"
+                    aria-controls="painel-ordens" aria-selected="true">
+                Ordens <span class="contador">{{ total }}</span>
+            </button>
+            <button type="button" class="aba" role="tab" id="aba-nova-ordem" data-aba="nova-ordem"
+                    aria-controls="painel-nova-ordem" aria-selected="false" tabindex="-1">
+                Nova ordem
+            </button>
+            <button type="button" class="aba" role="tab" id="aba-novo-veiculo" data-aba="novo-veiculo"
+                    aria-controls="painel-novo-veiculo" aria-selected="false" tabindex="-1">
+                Novo veículo
+            </button>
+            <button type="button" class="aba" role="tab" id="aba-veiculos" data-aba="veiculos"
+                    aria-controls="painel-veiculos" aria-selected="false" tabindex="-1">
+                Veículos <span class="contador">{{ veiculos | length }}</span>
+            </button>
+        </nav>
 
-                <div class="linha">
-                    <label>Nome do cliente
-                        <input name="nome" placeholder="Ex.: Maria Silva" autocomplete="off"
-                               value="{{ form.get('nome', '') }}" required>
-                    </label>
-                    <label>Telefone (opcional)
-                        <input name="telefone" type="tel" inputmode="tel" placeholder="(47) 99999-1234"
-                               pattern="[0-9 ()+\-]{10,20}" title="DDD + número, ex.: (47) 99999-1234"
-                               autocomplete="off" value="{{ form.get('telefone', '') }}">
-                    </label>
+        <div class="paineis">
+
+            <!-- ABA: Ordens de serviço -->
+            <section class="cartao painel" role="tabpanel" id="painel-ordens" aria-labelledby="aba-ordens">
+                <div class="cabecalho-tabela">
+                    <h2>Ordens de serviço</h2>
+                    <div class="acoes-topo">
+                        <input class="busca" id="busca" type="search" placeholder="Buscar placa, cliente ou serviço" aria-label="Buscar ordens">
+                        <a class="btn-sec" href="/exportar" title="Baixa todos os dados em um arquivo .json">Baixar backup (.json)</a>
+                    </div>
                 </div>
-                <div class="linha">
-                    <label>Placa
-                        <input name="placa" id="placa" placeholder="ABC1D23" maxlength="8"
-                               pattern="[A-Za-z]{3}-?[0-9][A-Za-z0-9][0-9]{2}"
-                               title="Formato antigo (ABC1234) ou Mercosul (ABC1D23)"
-                               autocomplete="off" value="{{ form.get('placa', '') }}" required>
-                    </label>
-                    <label>Modelo
-                        <input name="modelo" placeholder="Ex.: Gol 1.0" autocomplete="off"
-                               value="{{ form.get('modelo', '') }}" required>
-                    </label>
+
+                <div class="filtros" role="group" aria-label="Filtrar por status">
+                    <button type="button" class="chip ativo" data-filtro="">Todas <span>{{ total }}</span></button>
+                    {% for s in status_validos %}
+                    <button type="button" class="chip" data-filtro="{{ s }}">{{ s | capitalize }}</button>
+                    {% endfor %}
                 </div>
-                <button class="btn" type="submit">Cadastrar veículo</button>
-            </form>
 
-            <form class="cartao" action="/ordens" method="post">
-                <h2>Nova ordem de serviço</h2>
-                <p class="ajuda">O valor total é mão de obra + peças.</p>
-
-                <label>Veículo
-                    <select name="veiculo_id" required {% if not veiculos %}disabled{% endif %}>
-                        <option value="">
-                            {% if veiculos %}Selecione o veículo{% else %}Cadastre um veículo primeiro{% endif %}
-                        </option>
-                        {% for v in veiculos %}
-                        <option value="{{ v.id }}" {% if form.get('veiculo_id') == v.id | string %}selected{% endif %}>
-                            {{ v.placa }} · {{ v.modelo }} ({{ v.nome }})
-                        </option>
-                        {% endfor %}
-                    </select>
-                </label>
-                <label>Descrição do serviço
-                    <input name="descricao" placeholder="Ex.: Troca de pastilhas de freio" autocomplete="off"
-                           value="{{ form.get('descricao', '') }}" required>
-                </label>
-                <div class="linha">
-                    <label>Mão de obra (R$)
-                        <input name="mao_de_obra" inputmode="decimal" placeholder="150,00" autocomplete="off"
-                               value="{{ form.get('mao_de_obra', '') }}" required>
-                    </label>
-                    <label>Peças (R$)
-                        <input name="pecas" inputmode="decimal" placeholder="0,00 (opcional)" autocomplete="off"
-                               value="{{ form.get('pecas', '') }}">
-                    </label>
+                <div class="tabela-rolagem">
+                    <table id="tabela-ordens">
+                        <thead>
+                            <tr>
+                                <th>Nº</th><th>Placa</th><th>Serviço</th><th>Datas</th>
+                                <th class="num">Valor</th><th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for o in ordens %}
+                            <tr data-status="{{ o.status }}"
+                                data-texto="{{ (o.placa ~ ' ' ~ o.cliente ~ ' ' ~ o.descricao) | lower }}">
+                                <td class="mudo">#{{ o.id }}</td>
+                                <td><span class="placa">{{ o.placa }}</span></td>
+                                <td>
+                                    {{ o.descricao }}
+                                    <small class="detalhe">{{ o.cliente }}</small>
+                                </td>
+                                <td class="datas">
+                                    {{ o.data_abertura | data }}
+                                    {% if o.data_conclusao %}
+                                    <small class="detalhe">Concluída: {{ o.data_conclusao | data }}</small>
+                                    {% endif %}
+                                </td>
+                                <td class="num">
+                                    <strong>{{ brl(o.valor) }}</strong>
+                                    {% if o.mao_de_obra is not none %}
+                                    <small class="detalhe">M.O. {{ brl(o.mao_de_obra) }} · Peças {{ brl(o.pecas) }}</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <form class="form-status" action="/ordens/{{ o.id }}/status" method="post">
+                                        <select name="status" class="status {{ classe[o.status] }}"
+                                                aria-label="Status da ordem {{ o.id }}">
+                                            {% for s in status_validos %}
+                                            <option value="{{ s }}" {% if s == o.status %}selected{% endif %}>{{ s | capitalize }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            <tr class="vazio" id="linha-vazia" {% if ordens %}hidden{% endif %}>
+                                <td colspan="6">
+                                    {% if ordens %}Nenhuma ordem encontrada com esses filtros.{% else %}Nenhuma ordem aberta ainda.{% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-                <button class="btn" type="submit" {% if not veiculos %}disabled{% endif %}>Abrir ordem</button>
-            </form>
-        </section>
+            </section>
 
-        <!-- Ordens de serviço -->
-        <section class="cartao">
-            <div class="cabecalho-tabela">
-                <h2>Ordens de serviço</h2>
-                <input class="busca" id="busca" type="search" placeholder="Buscar placa, cliente ou serviço" aria-label="Buscar ordens">
-            </div>
+            <!-- ABA: Nova ordem -->
+            <section class="painel" role="tabpanel" id="painel-nova-ordem" aria-labelledby="aba-nova-ordem" hidden>
+                <form class="cartao cartao-form" action="/ordens" method="post" data-destino="ordens">
+                    <h2>Nova ordem de serviço</h2>
+                    <p class="ajuda">O valor total é mão de obra + peças.</p>
 
-            <div class="filtros" role="group" aria-label="Filtrar por status">
-                <button type="button" class="chip ativo" data-filtro="">Todas <span>{{ total }}</span></button>
-                {% for s in status_validos %}
-                <button type="button" class="chip" data-filtro="{{ s }}">{{ s | capitalize }}</button>
-                {% endfor %}
-            </div>
+                    <label>Veículo
+                        <select name="veiculo_id" required {% if not veiculos %}disabled{% endif %}>
+                            <option value="">
+                                {% if veiculos %}Selecione o veículo{% else %}Cadastre um veículo primeiro{% endif %}
+                            </option>
+                            {% for v in veiculos %}
+                            <option value="{{ v.id }}" {% if form.get('veiculo_id') == v.id | string %}selected{% endif %}>
+                                {{ v.placa }} · {{ v.modelo }} ({{ v.nome }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <label>Descrição do serviço
+                        <input name="descricao" placeholder="Ex.: Troca de pastilhas de freio" autocomplete="off"
+                               value="{{ form.get('descricao', '') }}" required>
+                    </label>
+                    <div class="linha">
+                        <label>Mão de obra (R$)
+                            <input name="mao_de_obra" id="mao-de-obra" inputmode="decimal" placeholder="150,00" autocomplete="off"
+                                   value="{{ form.get('mao_de_obra', '') }}" required>
+                        </label>
+                        <label>Peças (R$)
+                            <input name="pecas" id="pecas" inputmode="decimal" placeholder="0,00 (opcional)" autocomplete="off"
+                                   value="{{ form.get('pecas', '') }}">
+                        </label>
+                    </div>
+                    <p class="previa" id="previa-total" aria-live="polite">Total: R$ 0,00</p>
+                    <button class="btn" type="submit" {% if not veiculos %}disabled{% endif %}>Abrir ordem</button>
+                </form>
+            </section>
 
-            <div class="tabela-rolagem">
-                <table id="tabela-ordens">
-                    <thead>
-                        <tr>
-                            <th>Nº</th><th>Placa</th><th>Serviço</th><th>Datas</th>
-                            <th class="num">Valor</th><th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for o in ordens %}
-                        <tr data-status="{{ o.status }}"
-                            data-texto="{{ (o.placa ~ ' ' ~ o.cliente ~ ' ' ~ o.descricao) | lower }}">
-                            <td class="mudo">#{{ o.id }}</td>
-                            <td><span class="placa">{{ o.placa }}</span></td>
-                            <td>
-                                {{ o.descricao }}
-                                <small class="detalhe">{{ o.cliente }}</small>
-                            </td>
-                            <td class="datas">
-                                {{ o.data_abertura | data }}
-                                {% if o.data_conclusao %}
-                                <small class="detalhe">Concluída: {{ o.data_conclusao | data }}</small>
-                                {% endif %}
-                            </td>
-                            <td class="num">
-                                <strong>{{ brl(o.valor) }}</strong>
-                                {% if o.mao_de_obra is not none %}
-                                <small class="detalhe">M.O. {{ brl(o.mao_de_obra) }} · Peças {{ brl(o.pecas) }}</small>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <form class="form-status" action="/ordens/{{ o.id }}/status" method="post">
-                                    <select name="status" class="status {{ classe[o.status] }}"
-                                            onchange="this.form.submit()" aria-label="Status da ordem {{ o.id }}">
-                                        {% for s in status_validos %}
-                                        <option value="{{ s }}" {% if s == o.status %}selected{% endif %}>{{ s | capitalize }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </form>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                        <tr class="vazio" id="linha-vazia" {% if ordens %}hidden{% endif %}>
-                            <td colspan="6">
-                                {% if ordens %}Nenhuma ordem encontrada com esses filtros.{% else %}Nenhuma ordem aberta ainda.{% endif %}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+            <!-- ABA: Novo veículo -->
+            <section class="painel" role="tabpanel" id="painel-novo-veiculo" aria-labelledby="aba-novo-veiculo" hidden>
+                <form class="cartao cartao-form" action="/cadastrar" method="post" data-destino="veiculos">
+                    <h2>Novo veículo</h2>
+                    <p class="ajuda">Se o cliente já existir (mesmo nome e telefone), o veículo é ligado a ele.</p>
 
-        <!-- Veículos -->
-        <section class="cartao">
-            <div class="cabecalho-tabela">
-                <h2>Veículos cadastrados</h2>
-            </div>
-            <div class="tabela-rolagem">
-                <table>
-                    <thead>
-                        <tr><th>Placa</th><th>Modelo</th><th>Cliente</th><th>Telefone</th></tr>
-                    </thead>
-                    <tbody>
-                        {% for v in veiculos %}
-                        <tr>
-                            <td><span class="placa">{{ v.placa }}</span></td>
-                            <td>{{ v.modelo }}</td>
-                            <td>{{ v.nome }}</td>
-                            <td class="mudo">{{ v.telefone | telefone }}</td>
-                        </tr>
-                        {% else %}
-                        <tr class="vazio"><td colspan="4">Nenhum veículo cadastrado ainda.</td></tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </section>
+                    <div class="linha">
+                        <label>Nome do cliente
+                            <input name="nome" placeholder="Ex.: Maria Silva" autocomplete="off"
+                                   value="{{ form.get('nome', '') }}" required>
+                        </label>
+                        <label>Telefone (opcional)
+                            <input name="telefone" id="telefone" type="tel" inputmode="tel" placeholder="(47) 99999-1234"
+                                   pattern="[0-9 ()+\-]{10,20}" title="DDD + número, ex.: (47) 99999-1234"
+                                   autocomplete="off" value="{{ form.get('telefone', '') }}">
+                        </label>
+                    </div>
+                    <div class="linha">
+                        <label>Placa
+                            <input name="placa" id="placa" placeholder="ABC1D23" maxlength="8"
+                                   pattern="[A-Za-z]{3}-?[0-9][A-Za-z0-9][0-9]{2}"
+                                   title="Formato antigo (ABC1234) ou Mercosul (ABC1D23)"
+                                   autocomplete="off" value="{{ form.get('placa', '') }}" required>
+                        </label>
+                        <label>Modelo
+                            <input name="modelo" placeholder="Ex.: Gol 1.0" autocomplete="off"
+                                   value="{{ form.get('modelo', '') }}" required>
+                        </label>
+                    </div>
+                    <button class="btn" type="submit">Cadastrar veículo</button>
+                </form>
+            </section>
+
+            <!-- ABA: Veículos -->
+            <section class="cartao painel" role="tabpanel" id="painel-veiculos" aria-labelledby="aba-veiculos" hidden>
+                <div class="cabecalho-tabela">
+                    <h2>Veículos cadastrados</h2>
+                </div>
+                <div class="tabela-rolagem">
+                    <table>
+                        <thead>
+                            <tr><th>Placa</th><th>Modelo</th><th>Cliente</th><th>Telefone</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for v in veiculos %}
+                            <tr>
+                                <td><span class="placa">{{ v.placa }}</span></td>
+                                <td>{{ v.modelo }}</td>
+                                <td>{{ v.nome }}</td>
+                                <td class="mudo">{{ v.telefone | telefone }}</td>
+                            </tr>
+                            {% else %}
+                            <tr class="vazio"><td colspan="4">Nenhum veículo cadastrado ainda.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
     </main>
 
     <footer class="rodape">Sistema de Oficina Mecânica · Flask + SQLite</footer>
 
-    <script>
-        // Placa sempre em maiúsculas enquanto digita
-        const placa = document.getElementById("placa");
-        placa.addEventListener("input", () => { placa.value = placa.value.toUpperCase(); });
-
-        // Avisos de sucesso somem sozinhos depois de alguns segundos
-        setTimeout(() => document.querySelectorAll(".aviso-sucesso").forEach(a => a.remove()), 6000);
-
-        // Filtro das ordens: busca por texto + chips de status
-        const busca = document.getElementById("busca");
-        const chips = document.querySelectorAll(".chip");
-        const linhas = document.querySelectorAll("#tabela-ordens tbody tr[data-status]");
-        const linhaVazia = document.getElementById("linha-vazia");
-        let filtroStatus = "";
-
-        function aplicarFiltros() {
-            const termo = busca.value.trim().toLowerCase();
-            let visiveis = 0;
-            linhas.forEach(l => {
-                const ok = (!filtroStatus || l.dataset.status === filtroStatus)
-                        && (!termo || l.dataset.texto.includes(termo));
-                l.hidden = !ok;
-                if (ok) visiveis++;
-            });
-            linhaVazia.hidden = visiveis > 0 || linhas.length === 0;
-        }
-
-        busca.addEventListener("input", aplicarFiltros);
-        chips.forEach(chip => chip.addEventListener("click", () => {
-            chips.forEach(c => c.classList.remove("ativo"));
-            chip.classList.add("ativo");
-            filtroStatus = chip.dataset.filtro;
-            aplicarFiltros();
-        }));
-    </script>
+    <script src="/static/script.js"></script>
 </body>
 </html>

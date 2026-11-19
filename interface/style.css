@@ -315,3 +315,63 @@ tbody tr:hover { background: color-mix(in srgb, var(--primaria) 5%, transparent)
     .topo { padding-bottom: 76px; }
     .cartao { padding: 18px; }
 }
+.abas {
+    display: flex;
+    gap: 6px;
+    padding: 6px;
+    background: var(--superficie);
+    border: 1px solid var(--borda);
+    border-radius: var(--raio);
+    box-shadow: var(--sombra);
+    overflow-x: auto;
+}
+.aba {
+    font: inherit;
+    font-weight: 600;
+    font-size: .92rem;
+    color: var(--mudo);
+    background: transparent;
+    border: 0;
+    border-radius: 10px;
+    padding: 9px 16px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .15s, color .15s;
+}
+.aba:hover { color: var(--primaria); background: var(--primaria-suave); }
+.aba[aria-selected="true"] { color: #fff; background: var(--primaria); }
+.aba:focus-visible { outline: 2px solid var(--primaria); outline-offset: 2px; }
+.contador {
+    margin-left: 6px;
+    padding: 0 8px;
+    border-radius: 999px;
+    font-size: .78rem;
+    background: color-mix(in srgb, currentColor 18%, transparent);
+}
+
+.paineis { display: grid; }
+.cartao-form { max-width: 680px; }
+
+/* ---------- Topo da tabela de ordens e botão de backup ---------- */
+.acoes-topo { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; flex: 1; justify-content: flex-end; }
+.btn-sec {
+    font: inherit;
+    font-size: .88rem;
+    font-weight: 600;
+    color: var(--primaria);
+    background: var(--primaria-suave);
+    border: 1px solid transparent;
+    border-radius: 10px;
+    padding: 9px 14px;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.btn-sec:hover { border-color: var(--primaria); }
+
+/* ---------- Prévia do total na nova ordem ---------- */
+.previa { font-weight: 700; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 760px) {
+    .acoes-topo { justify-content: stretch; width: 100%; }
+    .acoes-topo .busca { flex: 1; min-width: 0; }
+}
