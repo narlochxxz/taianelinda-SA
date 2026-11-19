@@ -1,104 +1,124 @@
 
-# Devolutiva formativa — Atividade 01 da SA
+# Devolutiva formativa — Atividade 02 da SA
 
-**Estudante:** Taiane  
+**Estudante:** Taiane Emanuely Narloch  
 **Turma:** Rio Negrinho — Manhã  
 **Unidade Curricular:** Programação de Aplicativos  
 **Projeto:** Oficina Mecânica  
-**Código analisado:** `codigo/app.py`  
-**Referência:** Situação de Aprendizagem nº 1 — *Da Ideia ao Código*
+**Atividade:** Interface funcional  
+**Arquivos analisados:** `codigo/app.py`, `interface/index.html`, `interface/script.js` e `interface/style.css`
 
 ## O que você já conseguiu desenvolver
 
-Taiane, você desenvolveu uma aplicação de oficina mecânica com cadastro de clientes e veículos, abertura de ordens de serviço e acompanhamento da situação dos atendimentos. O projeto demonstra atenção à organização do código, à validação de entradas e à integração entre diferentes recursos.
+Taiane, seu projeto apresenta uma interface web estruturada e integrada à aplicação Flask.
+
+Você organizou funcionalidades de cadastro, consulta e acompanhamento das ordens de serviço.
 
 Pontos positivos identificados:
 
-- Criou **funções reutilizáveis** para validar placas, valores e telefones.
-- Implementou a normalização de dados, como nomes, placas e números telefônicos.
-- Utilizou expressões regulares para reconhecer placas nos formatos antigo e Mercosul.
-- Organizou o cálculo dos orçamentos em uma função específica.
-- Criou rotas Flask para cadastrar veículos, abrir ordens e atualizar situações.
-- Utilizou **SQLite e consultas SQL parametrizadas**.
-- Implementou um gerenciador de conexões com `commit()`, `rollback()` e fechamento adequado da conexão.
-- Definiu funções para formatar datas e telefones.
-- Incluiu verificações com `assert` na função `testar_funcoes()`.
-- Desenvolveu arquivos HTML e CSS relacionados à aplicação, antecipando parte da etapa de interface.
-- Adicionou docstrings que explicam diferentes funções e regras.
+- Separou HTML, CSS e JavaScript.
+- Utilizou templates Jinja2 para apresentar dados da aplicação.
+- Criou abas para navegar entre funcionalidades.
+- Desenvolveu formulários para cadastro de veículos e abertura de ordens.
+- Implementou recursos de busca e filtros.
+- Criou indicadores para apresentar quantidades e situações das ordens.
+- Utilizou JavaScript para controlar a navegação e atualizar componentes.
+- Implementou máscara de telefone e normalização de placa.
+- Criou prévia de valores de orçamento.
+- Incluiu recursos de navegação por teclado.
+- Aplicou atributos de acessibilidade em diferentes componentes.
+- Utilizou funções para organizar operações da interface.
+- Incluiu comentários e docstrings no código.
+
+## Comparação com a devolutiva anterior
+
+### 1. Integração entre código e interface — ATENDIDO
+
+Na avaliação anterior, foi recomendado verificar a correspondência entre os campos dos formulários e as rotas Flask.
+
+A nova interface utiliza formulários conectados às operações de cadastro, abertura de ordens e atualização de situações.
+
+**Evolução positiva:** a estrutura demonstra ligação entre HTML e as funcionalidades do Python.
+
+### 2. Modularização — PARCIALMENTE ATENDIDO
+
+A interface está organizada em HTML, CSS e JavaScript, o que facilita sua manutenção.
+
+Entretanto, o código Python ainda concentra validações, operações de banco e rotas Flask.
+
+**Como melhorar:** separar gradualmente essas responsabilidades.
+
+### 3. Testes — PARCIALMENTE ATENDIDO
+
+O Python contém testes de funções auxiliares.
+
+**Como melhorar:** ampliar a verificação para os formulários, as rotas e a persistência dos registros.
+
+### 4. Segurança de execução — PENDENTE
+
+A configuração de desenvolvimento ainda utiliza uma chave padrão como alternativa e permite iniciar o Flask em modo de depuração.
+
+**Como melhorar:** utilizar configurações apropriadas antes de publicar o sistema fora do ambiente de desenvolvimento.
 
 ## O que precisa ser corrigido
 
-### 1. Revisar as configurações utilizadas na execução
+### 5. Compreender os trechos utilizados
 
-O aplicativo utiliza uma chave padrão para desenvolvimento e inicia o servidor com `debug=True`.
+O arquivo JavaScript contém um comentário indicando que a parte inicial da navegação por abas ainda precisa ser estudada.
 
-Essas configurações podem ser utilizadas em ambiente local de estudo, mas precisam ser modificadas antes de qualquer publicação da aplicação.
+É positivo identificar os próprios pontos de aprendizagem.
 
-**Como melhorar:** exigir uma chave de sessão configurada pelo ambiente e manter o modo de depuração desativado fora dos testes locais.
-
-### 2. Revisar a representação dos valores monetários
-
-O sistema utiliza `float` para os valores de mão de obra, peças e orçamentos.
-
-Embora o programa arredonde os resultados, operações monetárias podem apresentar diferenças de precisão quando representadas em ponto flutuante.
-
-**Como melhorar:** considerar `Decimal` ou valores inteiros em centavos. Isso permitirá trabalhar de maneira mais consistente com orçamentos.
-
-### 3. Melhorar a documentação de execução
-
-O README identifica o projeto como Oficina Mecânica, mas ainda precisa informar claramente as dependências, os comandos de execução e os testes disponíveis.
-
-**Como melhorar:** incluir instruções para instalar o Flask, executar `codigo/app.py`, acessar o sistema no navegador e utilizar o modo `--testar`.
-
-## Oportunidades de melhoria
-
-### 4. Separar responsabilidades entre os módulos
-
-O arquivo principal contém validações, criação de tabelas, migrações simples, operações com o banco e rotas Flask.
-
-**Como melhorar:** organizar gradualmente essas responsabilidades em arquivos separados, como regras de negócio, banco de dados e rotas da aplicação.
-
-### 5. Ampliar os testes
-
-A função `testar_funcoes()` verifica diferentes valores, placas, telefones e cálculos.
-
-**Como melhorar:** complementar os testes com operações de cadastro, abertura de ordens e alteração de situações, verificando também respostas de erro e integridade dos registros.
+**Como melhorar:** revisar o funcionamento de `querySelectorAll()`, `forEach()`, `addEventListener()` e da navegação por teclado. Procure explicar com suas palavras o que cada trecho faz.
 
 ### 6. Revisar as regras de alteração das ordens
 
-A rota `atualizar_status()` permite definir uma situação válida para a ordem e registra a data de conclusão quando necessário.
+**Como melhorar:** definir quais mudanças de situação são permitidas e impedir transições incompatíveis com o processo da oficina.
 
-**Como melhorar:** avaliar se todas as mudanças entre `aberta`, `em andamento` e `concluída` devem ser permitidas. Definir transições coerentes com o processo da oficina.
+### 7. Melhorar a documentação de execução
 
-### 7. Garantir a consistência entre código e interface
+**Como melhorar:** atualizar o README com dependências, comando para iniciar o Flask, acesso à página e procedimento de testes.
 
-O repositório possui arquivos HTML e CSS, e o código Flask faz referência ao template `index.html`.
+## Oportunidades de melhoria
 
-**Como melhorar:** verificar se os campos enviados pelos formulários correspondem aos nomes esperados em `request.form` e se as mensagens de validação aparecem corretamente na interface.
+### 8. Aprimorar os cálculos monetários
+
+O sistema utiliza `float` e arredondamentos.
+
+**Como melhorar:** estudar o uso de `Decimal` ou valores em centavos, garantindo consistência nos orçamentos.
+
+### 9. Testar a consistência entre interface e servidor
+
+**Como melhorar:** verificar se valores rejeitados pelo JavaScript também são rejeitados pelo Python. A validação não deve depender exclusivamente do navegador.
+
+### 10. Melhorar a organização dos módulos
+
+**Como melhorar:** considerar arquivos específicos para banco, validações, rotas e regras das ordens de serviço.
 
 ## Testes recomendados
 
-1. Executar a função `testar_funcoes()`.
-2. Cadastrar veículos com placas válidas e inválidas.
-3. Tentar cadastrar uma placa já existente.
-4. Informar telefone válido, inválido e vazio.
-5. Abrir ordens com valores de mão de obra e peças.
-6. Testar valores negativos e entradas não numéricas.
-7. Atualizar as situações de uma ordem.
-8. Verificar as datas de abertura e conclusão.
-9. Conferir a recuperação dos registros após reiniciar o sistema.
-10. Testar o envio dos formulários pela interface.
+1. Cadastrar um veículo com placa válida.
+2. Tentar cadastrar placa inválida e duplicada.
+3. Testar telefone válido, inválido e vazio.
+4. Abrir uma ordem com valores de mão de obra e peças.
+5. Confirmar o cálculo apresentado na prévia.
+6. Filtrar ordens por situação e texto.
+7. Atualizar a situação de uma ordem.
+8. Reiniciar a aplicação e verificar os dados.
+9. Navegar pelas abas utilizando teclado.
+10. Verificar as mensagens apresentadas após entradas inválidas.
 
 ## Prioridades para a próxima versão
 
-1. **Melhorar a configuração de segurança para publicação.**
-2. **Revisar a precisão dos cálculos monetários.**
-3. **Definir regras claras para as transições de situação das ordens.**
-4. **Ampliar os testes de integração entre rotas e banco.**
-5. **Separar responsabilidades e complementar o README.**
+1. **Compreender e explicar todas as funções utilizadas.**
+2. **Ampliar os testes de integração.**
+3. **Definir as transições permitidas das ordens.**
+4. **Revisar as configurações de segurança.**
+5. **Separar gradualmente os módulos Python.**
 
 ## Mensagem final
 
-Taiane, seu projeto demonstra uma boa compreensão de **funções, validações, organização do código, tratamento de erros e integração de componentes**. A presença de testes para as regras principais também é um ponto positivo.
+Taiane, seu projeto apresenta uma evolução consistente na integração de Flask, HTML, CSS e JavaScript.
 
-Continue evoluindo a aplicação com atenção especial à confiabilidade dos dados, às transições entre situações e à documentação. Esses cuidados ajudarão você a manter o sistema organizado e facilitarão as próximas etapas do projeto.
+A organização das abas, dos formulários e dos recursos de busca demonstra atenção à experiência do usuário.
+
+Continue aprofundando a compreensão dos recursos utilizados e desenvolvendo testes que comprovem o funcionamento do sistema.
